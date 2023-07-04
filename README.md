@@ -2,5 +2,5 @@
 
 A Software for **Windows**.
 
-based on previous project,
+based on previous project:
 https://github.com/tharushaudana/rgb_color_faden_plate_generator
