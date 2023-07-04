@@ -81,7 +81,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       s += "// [${colorToHex(colors[0])}]\n";
 
       for (var color in colors) {
-        s += "0x" + colorToHex(color) + ", ";
+        s += "0x${colorToHex(color)}, ";
       }
 
       if (i < plate.length - 1) s += "\n";
