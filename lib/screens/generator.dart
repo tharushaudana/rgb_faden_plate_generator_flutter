@@ -25,7 +25,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
 
   late CodeController _codeController;
 
-  bool lightenFade = false;
+  int fadeMode = 0; // 0: darken | 1: lighten | 2: mixed
 
   double yValue(double x) {
     return math.pow(1 - math.pow(x, factorX), 1 / factorY).toDouble();
@@ -49,11 +49,11 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     }
   }
 
-  Color fadenColorAtPos(Color leadColor, int pos) {
+  Color fadenColorAtPos(Color leadColor, int pos, {bool lighten = false}) {
     double p = f1xpos + ((pos + 1) / fadeLen) * (1 - f1xpos);
     double v = 1 - yValue(p);
 
-    return lightenFade
+    return lighten
         ? leadColor
             .withRed(math.min(255, leadColor.red + 255 * (1 - v)).toInt())
             .withGreen(math.min(255, leadColor.green + 255 * (1 - v)).toInt())
@@ -70,9 +70,22 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     for (int i = 0; i < widget.colors.length; i++) {
       plate.add([]);
       for (int j = fadeLen - 1; j >= 0; j--) {
-        Color c = fadenColorAtPos(widget.colors[i], j);
+        Color c = fadenColorAtPos(
+          widget.colors[i],
+          j,
+          lighten: fadeMode == 1,
+        );
         plate[i].add(c);
-        //log(colorToHex(c));
+      }
+      if (fadeMode == 2) {
+        for (int j = fadeLen - 2; j >= 0; j--) {
+          Color c = fadenColorAtPos(
+            widget.colors[i],
+            j,
+            lighten: true,
+          );
+          plate[i].add(c);
+        }
       }
     }
 
@@ -184,18 +197,54 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                     },
                   ),
                   const SizedBox(width: 10),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Checkbox(
-                        value: lightenFade,
-                        onChanged: (value) {
-                          setState(() {
-                            lightenFade = value!;
-                            generatePlate();
-                          });
-                        },
+                      Row(
+                        children: [
+                          Radio(
+                            groupValue: fadeMode,
+                            value: 0,
+                            onChanged: (value) {
+                              setState(() {
+                                fadeMode = value!;
+                                generatePlate();
+                              });
+                            },
+                          ),
+                          const Text("Darken")
+                        ],
                       ),
-                      Text("Lighten")
+                      Row(
+                        children: [
+                          Radio(
+                            groupValue: fadeMode,
+                            value: 1,
+                            onChanged: (value) {
+                              setState(() {
+                                fadeMode = value!;
+                                generatePlate();
+                              });
+                            },
+                          ),
+                          const Text("Lighten")
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Radio(
+                            groupValue: fadeMode,
+                            value: 2,
+                            onChanged: (value) {
+                              setState(() {
+                                fadeMode = value!;
+                                generatePlate();
+                              });
+                            },
+                          ),
+                          const Text("Mixed")
+                        ],
+                      ),
                     ],
                   ),
                   const Spacer(),
@@ -203,7 +252,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                     onPressed: () {
                       openCode();
                     },
-                    child: Text("GET CODE"),
+                    child: const Text("GET CODE"),
                   ),
                 ],
               ),
