@@ -25,6 +25,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
 
   late CodeController _codeController;
 
+  bool lightenFade = false;
+
   double yValue(double x) {
     return math.pow(1 - math.pow(x, factorX), 1 / factorY).toDouble();
   }
@@ -51,10 +53,15 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     double p = f1xpos + ((pos + 1) / fadeLen) * (1 - f1xpos);
     double v = 1 - yValue(p);
 
-    return leadColor
-        .withRed((leadColor.red * v).toInt())
-        .withGreen((leadColor.green * v).toInt())
-        .withBlue((leadColor.blue * v).toInt());
+    return lightenFade
+        ? leadColor
+            .withRed(math.min(255, leadColor.red + 255 * (1 - v)).toInt())
+            .withGreen(math.min(255, leadColor.green + 255 * (1 - v)).toInt())
+            .withBlue(math.min(255, leadColor.blue + 255 * (1 - v)).toInt())
+        : leadColor
+            .withRed((leadColor.red * v).toInt())
+            .withGreen((leadColor.green * v).toInt())
+            .withBlue((leadColor.blue * v).toInt());
   }
 
   generatePlate() async {
@@ -175,6 +182,21 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                       fadeLen = value.toInt();
                       generatePlate();
                     },
+                  ),
+                  const SizedBox(width: 10),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: lightenFade,
+                        onChanged: (value) {
+                          setState(() {
+                            lightenFade = value!;
+                            generatePlate();
+                          });
+                        },
+                      ),
+                      Text("Lighten")
+                    ],
                   ),
                   const Spacer(),
                   FilledButton(
